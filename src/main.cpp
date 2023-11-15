@@ -459,7 +459,6 @@ void setup()
       {
         Serial.println("Default Vref: 1100mV");
       }
-
     #ifdef DISP_BUTTONS
         tft.fillScreen(TFT_BLACK);
         tft.setTextDatum(MC_DATUM);
@@ -484,19 +483,17 @@ void loop()
     button_loop();
     run_Clock();
   }
-
 void drawAlert(int x, int y, boolean draw)
-{
-  if (draw)
   {
-    drawIcon(alert, x - alertWidth / 2, y - alertHeight / 2, alertWidth, alertHeight);
+    if (draw)
+      {
+        drawIcon(alert, x - alertWidth / 2, y - alertHeight / 2, alertWidth, alertHeight);
+      }
+      else if (!draw)
+      {
+        tft.fillRect(x - alertWidth / 2, y - alertHeight / 2, alertWidth, alertHeight, TFT_BLACK);
+      }
   }
-  else if (!draw)
-  {
-    tft.fillRect(x - alertWidth / 2, y - alertHeight / 2, alertWidth, alertHeight, TFT_BLACK);
-  }
-}
-
 //====================================================================================
 // This is the function to draw the icon stored as an array in program memory (FLASH)
 //====================================================================================
@@ -506,40 +503,33 @@ void drawAlert(int x, int y, boolean draw)
 
 // Draw array "icon" of defined width and height at coordinate x,y
 // Maximum icon size is 255x255 pixels to avoid integer overflow
-
 void drawIcon(const unsigned short *icon, int16_t x, int16_t y, int8_t width, int8_t height)
   {
-
     uint16_t pix_buffer[BUFF_SIZE]; // Pixel buffer (16 bits per pixel)
-
     tft.startWrite();
-
     // Set up a window the right size to stream pixels into
     tft.setAddrWindow(x, y, width, height);
-
     // Work out the number whole buffers to send
     uint16_t nb = ((uint16_t)height * width) / BUFF_SIZE;
-
     // Fill and send "nb" buffers to TFT
     for (int i = 0; i < nb; i++)
-    {
-      for (int j = 0; j < BUFF_SIZE; j++)
       {
-        pix_buffer[j] = pgm_read_word(&icon[i * BUFF_SIZE + j]);
+        for (int j = 0; j < BUFF_SIZE; j++)
+          {
+            pix_buffer[j] = pgm_read_word(&icon[i * BUFF_SIZE + j]);
+          }
+        tft.pushColors(pix_buffer, BUFF_SIZE);
       }
-      tft.pushColors(pix_buffer, BUFF_SIZE);
-    }
 
     // Work out number of pixels not yet sent
     uint16_t np = ((uint16_t)height * width) % BUFF_SIZE;
-
     // Send any partial buffer left over
     if (np)
-    {
-      for (int i = 0; i < np; i++)
-        pix_buffer[i] = pgm_read_word(&icon[nb * BUFF_SIZE + i]);
-      tft.pushColors(pix_buffer, np);
-    }
+      {
+        for (int i = 0; i < np; i++)
+          pix_buffer[i] = pgm_read_word(&icon[nb * BUFF_SIZE + i]);
+        tft.pushColors(pix_buffer, np);
+      }
 
     tft.endWrite();
   }

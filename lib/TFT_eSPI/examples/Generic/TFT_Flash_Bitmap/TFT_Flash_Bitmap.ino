@@ -52,7 +52,6 @@ void setup()
 
   // Pause here to admire the icons!
   delay(2000);
-
 }
 
 void loop()
